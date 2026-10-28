@@ -33,8 +33,8 @@ your edition and start playing.
 
 ## Status and availability
 
-Download **[ApricotGS v00.030.005](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.030.005)**.
-Choose **ApricotGS-v00.030.005-PS5.zip** for the application. The release page also
+Download **[ApricotGS v00.040.005](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.005)**.
+Choose **ApricotGS-v00.040.005-PS5.zip** for the application. The release page also
 contains the version history and known issues.
 
 This is an experimental release. A complete playthrough has not been verified.
@@ -49,40 +49,41 @@ This is an experimental release. A complete playthrough has not been verified.
 
 ### 1. Install the app
 
-Download **ApricotGS-v00.030.005-PS5.zip** from the release page and extract its
+Download **ApricotGS-v00.040.005-PS5.zip** from the release page and extract its
 `PPSA99429` folder into `/data/homebrew/` on the PS5. The executable should be at:
 
 ```text
 /data/homebrew/PPSA99429/eboot.bin
 ```
 
-### 2. Create the game folder
+### 2. Select your own game
 
-Start ApricotGS once, then close it. The app creates the folder for your game files.
-If no game has been added yet, the message asking for an NDS file is expected.
+Start ApricotGS and open the library. Choose **Lokal** to browse a readable
+folder you select, including a connected USB drive, or **RomM** to connect to
+your server by URL or hostname. For the inbox, use `/data/apricotgs-roms/`.
+Only supported individual `.nds` files can be imported; archives are not imported.
 
-### 3. Copy your game
+For RomM, enter your own server address. Sign in with username/password or use
+**Geraet koppeln** and the eight-character code from your RomM device-pairing
+screen. The app stores the connection privately so you can add more games later.
+Use **Abmelden und Verbindung loeschen** to remove the saved connection.
+An expired or revoked login may require signing in again. Passwords are not saved.
 
-Using your PS5 file manager or transfer service, copy your supported `.nds` file into:
+### 3. Import and play
 
-```text
-/data/apricotgs-roms/
-```
-
-You can add HeartGold, SoulSilver, or both. You may choose the filenames freely.
-Keep your original game files as a backup.
-
-### 4. Prepare and play
-
-Start ApricotGS again. It prepares the added game automatically and displays
-progress. This can take several minutes per edition; keep the app running
-until the cartridge selection appears.
-
+Select a supported file and confirm the import. ApricotGS verifies and prepares
+it on the PS5; this can take several minutes. Keep your original files as a backup.
 Choose an edition with the **D-pad or left stick**, then press **Cross** to start.
 The selection screen also appears when you have added only one edition.
+Press **Triangle** there to reopen the library and add another game.
+
 
 ## Features
 
+- Local game-file browser and RomM library with download progress/cancellation.
+- Remembered RomM connection, device pairing and explicit logout.
+- Import management with confirmation; saves are kept when an import is removed.
+- Consistent glass surfaces, readable focus/case indicators and original controller prompts.
 - Animated cartridge selection with edition-specific title images and music.
 - Continuous title music when switching cartridges, plus Home-screen tile music.
 - DualSense controls and an on-screen pointer for the touchscreen.
@@ -91,6 +92,11 @@ The selection screen also appears when you have added only one edition.
 
 ## Saving and updates
 
+**Importierte Spiele verwalten** removes an imported edition after confirmation.
+Original files and saves are preserved. The active edition cannot be removed.
+Deleting the saved RomM connection does not delete server games or local saves.
+
+
 Save through the game's own save menu and wait for it to finish before closing
 the app. To exit during play, press **L3 + R3** together. On the cartridge
 selection screen, press **Options** to exit.
@@ -98,8 +104,8 @@ selection screen, press **Options** to exit.
 For an update, replace the application folder with the new release, or use
 ProsperoStore when that update is available there. Keep these folders:
 
-- `/data/apricotgs-roms/` — your input game files.
-- `/data/orqenva/` — prepared game data and saves; saves are under `saves/`.
+- `/data/apricotgs-roms/` â€” your input game files.
+- `/data/orqenva/` â€” prepared game data and saves; saves are under `saves/`.
 
 Back up your saves before updating. Normally, prepared games are reused on later
 starts. If repair is needed, keep the matching original `.nds` file in the input
@@ -155,3 +161,13 @@ Platform contributions include attributed work by **Mihawk-99 / Mihawk** and **B
 The existing [MIT license](LICENSE) applies to the original work covered by that notice. It does not relicense GPL/LGPL components, controller artwork, proprietary game content or the combined runtime as a whole. Missing rights or incompatible license obligations block publication; third-party notices are retained.
 
 Game names are used only to identify compatibility. No game content is supplied, no affiliation with Nintendo, Game Freak or Sony is claimed, and users must have the rights required to prepare their own data under applicable law. Providing your own dump is not a blanket legal exemption.
+
+## Corresponding source and building
+
+The release provides automatic **Source code (zip)** and **Source code (tar.gz)**
+downloads at [v00.040.005](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.005).
+Pinned dependency revisions and license/relinking requirements are in
+[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
+Use `platform/ps5/tools/build-game-ps5.sh` with `ORQENVA_VULKAN_ROOT` pointing to
+the pinned PS5 Vulkan/dependency build, then `python3 assets/prepare-ui.py <app-directory>`
+for the project-owned display assets. No game data or saved connection is included.

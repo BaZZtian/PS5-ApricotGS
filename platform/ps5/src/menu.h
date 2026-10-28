@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Native UI text using the licensed Oxanium release atlas.
+// Native UI text; private trial evaluation is separate from the release atlas.
 #pragma once
 #include <cstdint>
 #include <algorithm>
 #include <string>
 #include <vector>
+#ifdef APRICOT_FONT_EVALUATION
+#include "apricot_font_evaluation.h"
+#else
 #include "ui_font_atlas.h"
+#endif
 // Area-filter once per requested size. Nearest sampling of the large atlas
 // discarded thin strokes and made even antialiased source glyphs look jagged.
 static const std::vector<unsigned char>& menuCoverage(int scale) {

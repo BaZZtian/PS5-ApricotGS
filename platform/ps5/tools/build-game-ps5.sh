@@ -30,7 +30,7 @@ compile() {
  local exception_flags=-fno-exceptions
  case "$source" in */vendor/at9/*.cpp|*/runtime/title_shell_music.cpp) exception_flags=-fexceptions;; esac
  sh "$root/tools/cc-init-array.sh" sh "$root/tools/prospero-clang18" "-std=$language" -O2 -g1 \
-  -ffunction-sections -fdata-sections -DOQ_PS5 -I "$root/runtime" -I "$root/src" -I "$work/gen" -I "$root/../../runtime/include" \
+  -ffunction-sections -fdata-sections -DOQ_PS5 -DAPRICOT_LIBRARY -I "$root/runtime" -I "$root/src" -I "$work/gen" -I "$root/../../runtime/include" \
   -I "$upstream/.deps/native/radv-release/include" ${APRICOT_SHELL_MUSIC:+-DAPRICOT_SHELL_MUSIC} "$exception_flags" -fno-rtti -c "$source" -o "$destination"
 }
 if [[ -n ${APRICOT_SHELL_MUSIC:-} ]];then
@@ -76,7 +76,7 @@ python3 - "$root" "$app" <<'PY'
 import json,sys
 from pathlib import Path
 root,app=map(Path,sys.argv[1:]);p=json.loads((root/'../../sce_sys/param.json').read_text())
-p.update(titleId='PPSA99429',conceptId='99429',contentId='UP9000-PPSA99429_00-APRICOTGSREADER00',contentVersion='00.030.005',targetContentVersion='00.030.005')
+p.update(titleId='PPSA99429',conceptId='99429',contentId='UP9000-PPSA99429_00-APRICOTGSREADER00',contentVersion='00.040.005',targetContentVersion='00.040.005')
 p.setdefault('pubtools',{})['loudnessSnd0']='-28.00'
 for record in p['localizedParameters'].values():
  if isinstance(record,dict):record['titleName']='ApricotGS'

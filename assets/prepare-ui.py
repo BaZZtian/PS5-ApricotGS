@@ -24,3 +24,6 @@ with Image.open(root/'assets/branding/banner.png') as image:
     data = dds.dds_header()+dds.bc7(np.asarray(rgb, dtype=np.float64))
 for name in ('pic0.dds', 'pic1.dds'):
     (destination/'sce_sys'/name).write_bytes(data)
+
+for name in ("header-logo.bgra", "loading-logo.bgra"):
+    shutil.copyfile(root/"assets/branding"/name, destination/"userdata"/name)
