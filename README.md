@@ -33,8 +33,8 @@ your edition and start playing.
 
 ## Status and availability
 
-Download **[ApricotGS v00.040.005](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.005)**.
-Choose **ApricotGS-v00.040.005-PS5.zip** for the application. The release page also
+Download **[ApricotGS v00.040.006](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.006)**.
+Choose **ApricotGS-v00.040.006-PS5.zip** for the application. The release page also
 contains the version history and known issues.
 
 This is an experimental release. A complete playthrough has not been verified.
@@ -49,7 +49,7 @@ This is an experimental release. A complete playthrough has not been verified.
 
 ### 1. Install the app
 
-Download **ApricotGS-v00.040.005-PS5.zip** from the release page and extract its
+Download **ApricotGS-v00.040.006-PS5.zip** from the release page and extract its
 `PPSA99429` folder into `/data/homebrew/` on the PS5. The executable should be at:
 
 ```text
@@ -58,7 +58,9 @@ Download **ApricotGS-v00.040.005-PS5.zip** from the release page and extract its
 
 ### 2. Select your own game
 
-Start ApricotGS and open the library. Choose **Lokal** to browse a readable
+Start ApricotGS in the edition-selection window and press **Triangle** to open
+the library. If no game has been imported, the middle of the window shows this
+action. Choose **Lokal** to browse a readable
 folder you select, including a connected USB drive, or **RomM** to connect to
 your server by URL or hostname. For the inbox, use `/data/apricotgs-roms/`.
 Only supported individual `.nds` files can be imported; archives are not imported.
@@ -68,6 +70,9 @@ For RomM, enter your own server address. Sign in with username/password or use
 screen. The app stores the connection privately so you can add more games later.
 Use **Abmelden und Verbindung loeschen** to remove the saved connection.
 An expired or revoked login may require signing in again. Passwords are not saved.
+When upgrading from 00.040.005, sign in once if the previous connection was not
+saved; subsequent app restarts retain it. Choose **Gespeicherte Verbindung oeffnen**
+to use that connection.
 
 ### 3. Import and play
 
@@ -75,7 +80,10 @@ Select a supported file and confirm the import. ApricotGS verifies and prepares
 it on the PS5; this can take several minutes. Keep your original files as a backup.
 Choose an edition with the **D-pad or left stick**, then press **Cross** to start.
 The selection screen also appears when you have added only one edition.
-Press **Triangle** there to reopen the library and add another game.
+Press **Triangle** there to reopen the library and add another game. Menu music
+continues during library visits. Music is generated locally from your own game;
+the first preparation or an update of older title music can take longer. Existing
+game data is preserved while the music is updated.
 
 
 ## Features
@@ -165,7 +173,7 @@ Game names are used only to identify compatibility. No game content is supplied,
 ## Corresponding source and building
 
 The release provides automatic **Source code (zip)** and **Source code (tar.gz)**
-downloads at [v00.040.005](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.005).
+downloads at [v00.040.006](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.006).
 Pinned dependency revisions and license/relinking requirements are in
 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
 Use `platform/ps5/tools/build-game-ps5.sh` with `ORQENVA_VULKAN_ROOT` pointing to

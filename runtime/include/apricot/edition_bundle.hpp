@@ -18,7 +18,7 @@ struct EditionBundle {
         if(bytes<1024*1024||bytes>0x20000000||(bytes&(bytes-1)))return false;
         auto p=data.data()+16;
         if(p[0]!='I'||p[1]!='P'||(p[2]!='K'&&p[2]!='G')||(p[3]!='D'&&p[3]!='E')||p[4]!='0'||p[5]!='1'||p[6]||p[7])return false;
-        if(u32(data.data()+184)>1)return false;
+        if(u32(data.data()+184)>2)return false;
         for(unsigned i=188;i<256;++i)if(data[i])return false;
         auto nonzero=[](const uint8_t*p){return std::any_of(p,p+32,[](uint8_t b){return b!=0;});};
         if(!nonzero(data.data()+24)||!nonzero(data.data()+56)||!nonzero(data.data()+88))return false;

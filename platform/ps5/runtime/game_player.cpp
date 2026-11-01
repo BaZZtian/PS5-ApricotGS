@@ -125,12 +125,16 @@ int main() {
     }progress{&display,&canvas};
     apricot::library::LibraryUi library(display,canvas,APP_DATA);
     bool library_requested=false;
+    PreparedMenuMixer menu_audio;bool menu_started=false;unsigned selected=0;
+    std::string menu_audio_keys[2];std::vector<std::string>media_refresh_attempted;
+    struct MenuAudioStop {bool&started;~MenuAudioStop(){if(started)audio_stop();}}menu_audio_stop{menu_started};
 library_entry:
     auto directory=[](const char*path){struct stat s{};if(!mkdir(path,0700))return true;return errno==EEXIST&&!lstat(path,&s)&&S_ISDIR(s.st_mode);};
     if(!directory(APP_DATA)||!directory(APP_DATA "/games")||!directory(APP_DATA "/roms")||!directory(APP_DATA "/saves"))return stopped(display,canvas,"DATENORDNER NICHT VERFUEGBAR");
     std::vector<std::string> inputs;
+    library.check_saved_connection();
     std::string chosen_input;bool downloaded_input=false;
-    if(library_requested){if(!library.choose(chosen_input,downloaded_input)){display.close(stderr);return 0;}library_requested=false;}
+    if(library_requested){if(!library.choose(chosen_input,downloaded_input)){if(menu_started){audio_stop();menu_started=false;}display.close(stderr);return 0;}library_requested=false;}
     struct DownloadCleanup {
         std::string path;
         ~DownloadCleanup(){if(!path.empty())unlink(path.c_str());}
@@ -154,6 +158,17 @@ library_entry:
            file_hash_matches(base+"/title-menu.pcm",bundle.audio_sha,64*1024*1024,0)&&
            file_hash_matches(base+"/identity-refs.bin",bundle.refs_sha,64*1024*1024,0);
     };
+    // Refresh old private title media using the already verified native module.
+    // Originals are retained by the existing transactional sibling/backup path.
+    std::vector<std::pair<std::string,std::string>>media_inputs;
+    for(const auto&folder:apricot::library::edition_folders(APP_DATA)){
+        std::vector<uint8_t>meta;apricot::EditionBundle bundle;
+        if(std::find(media_refresh_attempted.begin(),media_refresh_attempted.end(),folder)!=media_refresh_attempted.end())continue;
+        if(read_data((folder+"/edition.bin").c_str(),meta,256)&&bundle.load(meta)&&bundle.media_revision<2&&intact_edition(folder)){
+            media_refresh_attempted.push_back(folder);std::string source=folder+"/game-data.bin";
+            if(std::find(inputs.begin(),inputs.end(),source)==inputs.end())inputs.push_back(source);media_inputs.push_back({source,folder});
+        }
+    }
     for(const auto&input:inputs){
         FILE*f=fopen(input.c_str(),"rb");uint8_t header[32]{};bool header_ok=f&&fread(header,1,32,f)==32;if(f)fclose(f);
         if(!header_ok||(memcmp(header+12,"IPKD",4)&&memcmp(header+12,"IPGD",4))){
@@ -162,11 +177,12 @@ library_entry:
         // New HG profile generation preserves the previous edition and saves.
         // Existing r1 modules cannot acquire newly compiled targets by an app update.
         std::string destination=std::string(APP_DATA "/games/")+(header[14]=='K'?"heartgold-r7":"soulsilver-r5");
+        for(const auto&entry:media_inputs)if(entry.first==input)destination=entry.second;
         struct stat destination_stat{};
         std::string repair=destination+".repairing";
         if(lstat(destination.c_str(),&destination_stat)&&errno==ENOENT&&!lstat(repair.c_str(),&destination_stat)&&S_ISDIR(destination_stat.st_mode)&&intact_edition(repair)){
             apricot::aot::PreparedRom recovery_input;std::string recovery_error;std::vector<uint8_t>recovery_meta;apricot::EditionBundle recovery_bundle;
-            if(apricot::aot::prepare_rom_file(input.c_str(),recovery_input,recovery_error)&&read_data((repair+"/edition.bin").c_str(),recovery_meta,256)&&recovery_bundle.load(recovery_meta)&&recovery_bundle.media_revision==1&&identity_matches(recovery_input.identity,recovery_bundle.identity)){
+            if(apricot::aot::prepare_rom_file(input.c_str(),recovery_input,recovery_error)&&read_data((repair+"/edition.bin").c_str(),recovery_meta,256)&&recovery_bundle.load(recovery_meta)&&recovery_bundle.media_revision==2&&identity_matches(recovery_input.identity,recovery_bundle.identity)){
                 if(!rename(repair.c_str(),destination.c_str())){say("edition_repair_recovered folder=%s",destination.c_str());continue;}
             }
             say("edition_repair_blocked folder=%s reason=orphan_repair_preserved",destination.c_str());repair_required=true;continue;
@@ -174,7 +190,7 @@ library_entry:
         if(!lstat(destination.c_str(),&destination_stat)){
             if(!S_ISDIR(destination_stat.st_mode)){say("edition_repair_blocked folder=%s reason=destination_not_directory",destination.c_str());repair_required=true;continue;}
             bool intact=intact_edition(destination);std::vector<uint8_t>existing_meta;apricot::EditionBundle existing_bundle;
-            bool refresh_media=intact&&read_data((destination+"/edition.bin").c_str(),existing_meta,256)&&existing_bundle.load(existing_meta)&&existing_bundle.media_revision==0;
+            bool refresh_media=intact&&read_data((destination+"/edition.bin").c_str(),existing_meta,256)&&existing_bundle.load(existing_meta)&&existing_bundle.media_revision<2;
             if(intact&&!refresh_media)continue;
             apricot::aot::PreparedRom verified_input;std::string verify_error;
             bool source_ok=apricot::aot::prepare_rom_file(input.c_str(),verified_input,verify_error);
@@ -185,7 +201,7 @@ library_entry:
             if(!source_ok||!known_old){say("edition_repair_blocked folder=%s reason=source_identity_unproven",destination.c_str());repair_required=true;continue;}
             if(!lstat(repair.c_str(),&destination_stat)){
                 std::vector<uint8_t>repair_meta;apricot::EditionBundle repair_bundle;
-                if(!S_ISDIR(destination_stat.st_mode)||!intact_edition(repair)||!read_data((repair+"/edition.bin").c_str(),repair_meta,256)||!repair_bundle.load(repair_meta)||repair_bundle.media_revision!=1||!identity_matches(verified_input.identity,repair_bundle.identity)){
+                if(!S_ISDIR(destination_stat.st_mode)||!intact_edition(repair)||!read_data((repair+"/edition.bin").c_str(),repair_meta,256)||!repair_bundle.load(repair_meta)||repair_bundle.media_revision!=2||!identity_matches(verified_input.identity,repair_bundle.identity)){
                     say("edition_repair_blocked folder=%s reason=stale_repair_preserved",destination.c_str());repair_required=true;continue;
                 }
             }
@@ -256,22 +272,32 @@ library_entry:
     });
     std::vector<std::string> playable_folders;for(const auto&e:editions)playable_folders.push_back(e.folder);library.set_playable(std::move(playable_folders));
     if(editions.empty()){
-        if(repair_required)library.notice("Beschaedigte Vorbereitung - eigene ROM erneut auswaehlen");{library_requested=true;goto library_entry;}
+        // Stay in the edition window. The library is always an explicit action.
+        if(menu_started){audio_stop();menu_started=false;}
     }
     std::sort(editions.begin(),editions.end(),[](const Edition&a,const Edition&b){return a.bundle.gold()>b.bundle.gold();});
     apricot::CartridgeView cartridge;std::vector<uint8_t> mesh;
-    if(!read_data("/app0/userdata/cartridge.mesh",mesh,2*1024*1024)||!cartridge.load(mesh))return stopped(display,canvas,"CARTRIDGE MODELL FEHLT ODER IST UNGUELTIG");
-    PreparedMenuMixer menu_audio;unsigned selected=0;bool any_music=false;
+    if(!editions.empty()&&(!read_data("/app0/userdata/cartridge.mesh",mesh,2*1024*1024)||!cartridge.load(mesh)))return stopped(display,canvas,"CARTRIDGE MODELL FEHLT ODER IST UNGUELTIG");
+    bool any_music=false;selected=editions.empty()?0:std::min(selected,unsigned(editions.size()-1));
+    // No mutation of callback-owned samples while audio is running. A view-only
+    // visit retains the exact mixer, buffers and playback cursors.
+    bool audio_changed=false;
+    for(unsigned n=0;n<2;++n){std::string key=n<editions.size()?std::string(reinterpret_cast<const char*>(editions[n].bundle.audio_sha),32):std::string{};if(key!=menu_audio_keys[n])audio_changed=true;}
+    if(audio_changed&&menu_started){audio_stop();menu_started=false;}
+    if(audio_changed)for(unsigned n=unsigned(editions.size());n<2;++n){menu_audio.tracks[n]=PreparedMenuAudio{};menu_audio_keys[n].clear();}
 #ifdef APRICOT_SHELL_MUSIC
     bool shell_music_attempted=false;
 #endif
     for(unsigned n=0;n<editions.size();++n){
         auto& e=editions[n];std::vector<uint8_t> bytes;GameIdentity id{};
         memcpy(id.game_code,e.bundle.identity,4);memcpy(id.maker_code,e.bundle.identity+4,2);id.revision=e.bundle.identity[6];memcpy(id.sha256,e.bundle.identity+8,32);
+        std::string audio_key(reinterpret_cast<const char*>(e.bundle.audio_sha),32);
+        if(menu_audio_keys[n]==audio_key&&menu_audio.tracks[n].frames){any_music=true;continue;}
+        menu_audio.tracks[n]=PreparedMenuAudio{};menu_audio_keys[n].clear();
         if(read_data((e.folder+"/title-menu.pcm").c_str(),bytes,64*1024*1024)){
             uint8_t digest[32];oq_sha256(bytes.data(),bytes.size(),digest);
             if(!memcmp(digest,e.bundle.audio_sha,32)&&menu_audio.tracks[n].load(bytes,id)){
-                any_music=true;
+                any_music=true;menu_audio_keys[n]=audio_key;
 #ifdef APRICOT_SHELL_MUSIC
                 if(!shell_music_attempted){
                     shell_music_attempted=true;std::string shell_error;bool shell_ok=false;std::atomic<bool>shell_done{false};
@@ -286,22 +312,16 @@ library_entry:
             }
         }
     }
-    bool menu_started=any_music&&audio_start(PreparedMenuMixer::fill,&menu_audio);
+    menu_audio.select(selected);
+    if(any_music&&!menu_started)menu_started=audio_start(PreparedMenuMixer::fill,&menu_audio);
     std::vector<uint32_t> launcher_base(1280*720,0);
     if(!native_art&&art)for(size_t n=0;n<launcher_base.size();++n){auto p=artwork.data()+n*4;launcher_base[n]=0xff000000u|uint32_t(p[0])<<16|uint32_t(p[1])<<8|p[2];}
     else if(!art)std::fill(launcher_base.begin(),launcher_base.end(),0xff101820);
     apricot::launcher_glass(launcher_base,native_art?display.native_background_rgba:artwork,native_art?3840:1280,native_art?2160:720);
     apricot::launcher_glass(launcher_base,native_art?display.native_background_rgba:artwork,native_art?3840:1280,native_art?2160:720,600,64,1248,118,true);
     menuProportionalText(launcher_base,620,78,"EDITION AUSWAEHLEN",0xff112c38,4,1280);
-    apricot::controller_icon(launcher_base,1280,720,602,660,apricot::ControlIcon::Dpad,true);
-    menuProportionalText(launcher_base,650,674,"WAHL",0xff112c38,3,1280);
-    apricot::controller_icon(launcher_base,1280,720,748,660,apricot::ControlIcon::Cross,true);
-    menuProportionalText(launcher_base,796,674,"START",0xff112c38,3,1280);
-    apricot::controller_icon(launcher_base,1280,720,apricot::library::library_control_x,660,apricot::ControlIcon::Triangle,true);
-    menuProportionalText(launcher_base,apricot::library::library_control_label_x,674,"BIBLIOTHEK",0xff112c38,3,1280);
-    apricot::controller_icon(launcher_base,1280,720,1090,660,apricot::ControlIcon::Options,true);
-    menuProportionalText(launcher_base,1138,674,"ENDE",0xff112c38,3,1280);
-    say("cartridge_launcher editions=%zu selected=%.4s automatic_selection=%u native_mesh=1",editions.size(),editions[selected].bundle.identity,editions.size()==1);
+    apricot::library::launcher_controls(launcher_base,!editions.empty());
+    say("cartridge_launcher editions=%zu selected=%.4s automatic_selection=%u native_mesh=1",editions.size(),editions.empty()?"NONE":reinterpret_cast<const char*>(editions[selected].bundle.identity),editions.size()==1);
     say("launcher_background=%s native_background=%u music=%s",art?"loaded":"missing",native_art,menu_started?"private-title-pcm":"not_prepared");
     support_report.phase=apricot::SupportReport::Phase::Selection;write_support_report();
     app_heading(launcher_base,true,native_art?display.native_background_rgba:artwork,native_art?3840:1280,native_art?2160:720);
@@ -311,14 +331,17 @@ library_entry:
     for(;;){
         double frame_begin=now_seconds(),now=frame_begin,elapsed=now-menu_begin;pad_poll(&launcher_pad);pad p=launcher_pad;
         auto launcher_action=launcher_navigation.update(p.held,p.left_x,p.left_y,now);p.pressed=launcher_action.pressed;
-        if(p.pressed&PAD_OPTIONS){support_report.phase=apricot::SupportReport::Phase::Exit;write_support_report();if(menu_started)audio_stop();display.close(stderr);return 0;}
-        if(p.pressed&PAD_TRIANGLE){if(menu_started)audio_stop();{library_requested=true;goto library_entry;}}
+        if(p.pressed&PAD_OPTIONS){support_report.phase=apricot::SupportReport::Phase::Exit;write_support_report();if(menu_started){audio_stop();menu_started=false;}display.close(stderr);return 0;}
+        if(p.pressed&PAD_TRIANGLE){library_requested=true;goto library_entry;}
         int direction=launcher_action.horizontal;
         if(!confirming&&direction&&editions.size()>1){unsigned target=direction<0?0:unsigned(editions.size()-1);
             if(target!=selected){double begin=now_seconds();selected=target;navigation_after=now+0.3;menu_audio.select(selected);say("cartridge_switch selected=%.4s main_thread_us=%.1f cached_audio=1",editions[selected].bundle.identity,(now_seconds()-begin)*1000000);}}
-            if(!confirming&&((p.pressed&PAD_CROSS))){confirming=true;confirm_begin=now;}
+            if(!editions.empty()&&!confirming&&((p.pressed&PAD_CROSS))){confirming=true;confirm_begin=now;}
         if(confirming&&now-confirm_begin>=0.5)break;
         canvas=launcher_base;
+        if(editions.empty()){
+            apricot::library::empty_edition_hint(canvas,native_art?display.native_background_rgba:artwork,native_art?3840:1280,native_art?2160:720,repair_required);
+        }
         size_t pixels=0;
         for(unsigned n=0;n<editions.size();++n){
             emphasis[n]+=(float(n==selected)-emphasis[n])*0.14f;
@@ -335,12 +358,12 @@ library_entry:
             if(n==selected)for(unsigned y=648;y<651;++y)std::fill_n(canvas.data()+y*1280+unsigned(cx)-48,96,0xff27596d);
         }
         if(elapsed<0.03)say("cartridge_render pixels=%zu",pixels);
-        if(display.present(canvas.data(),1280,720,1280*4,stderr,nullptr,true)){if(menu_started)audio_stop();return 1;}
+        if(display.present(canvas.data(),1280,720,1280*4,stderr,nullptr,true)){if(menu_started){audio_stop();menu_started=false;}return 1;}
         ++menu_frames;double finish=now_seconds();menu_max=std::max(menu_max,finish-frame_begin);
         if(finish-menu_perf_begin>=2){say("cartridge_perf fps=%.1f max_frame_ms=%.2f cached_audio=1",menu_frames/(finish-menu_perf_begin),menu_max*1000);menu_perf_begin=finish;menu_frames=0;menu_max=0;}
         usleep(1000);
     }
-    if(menu_started)audio_stop();
+    if(menu_started){audio_stop();menu_started=false;}
     support_report.set_game(editions[selected].bundle.identity);
     std::string selected_folder=editions[selected].folder;auto selected_bundle=editions[selected].bundle;
     std::vector<uint8_t> rom;GameIdentity identity{};

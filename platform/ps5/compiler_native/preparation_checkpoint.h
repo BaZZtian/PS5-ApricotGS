@@ -15,7 +15,7 @@
 namespace apricot::aot {
 // Bump this whenever preparation semantics change. Checkpoints are private,
 // disposable compiler output; they are never game saves.
-constexpr uint32_t PREPARATION_COMPILER_EPOCH=2;
+constexpr uint32_t PREPARATION_COMPILER_EPOCH=3;
 namespace checkpoint_detail {
 inline void put32(uint8_t*p,uint32_t n){for(unsigned i=0;i<4;++i)p[i]=uint8_t(n>>(8*i));}
 inline void put64(uint8_t*p,uint64_t n){for(unsigned i=0;i<8;++i)p[i]=uint8_t(n>>(8*i));}

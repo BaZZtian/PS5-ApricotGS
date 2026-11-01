@@ -38,7 +38,7 @@ bool install(const std::string&dir,const char*title,const std::vector<uint8_t>&a
 bool prepare_shell_music(const std::vector<uint8_t>&pcm,const std::string&persistent,const std::string&app,const std::string&cache,const char*title,std::string&error){
  try{
   auto u32=[&](size_t i){return uint32_t(pcm[i])|uint32_t(pcm[i+1])<<8|uint32_t(pcm[i+2])<<16|uint32_t(pcm[i+3])<<24;};
-  if(pcm.size()<64||memcmp(pcm.data(),"APAU0001",8)||u32(8)!=48000||pcm[12]!=2||pcm[13]||pcm[14]!=16||pcm[15]||u32(16)==0||u32(16)>48000*180||pcm.size()!=64+size_t(u32(16))*4){error="Invalid shell music PCM";return false;}
+  if(pcm.size()<64||memcmp(pcm.data(),"APAU0001",8)||u32(8)!=48000||pcm[12]!=2||pcm[13]||pcm[14]!=16||pcm[15]||u32(16)==0||u32(16)>48000*300||pcm.size()!=64+size_t(u32(16))*4){error="Invalid shell music PCM";return false;}
   uint8_t hash[32];oq_sha256(pcm.data(),pcm.size(),hash);char hex[65];for(unsigned i=0;i<32;++i)snprintf(hex+i*2,3,"%02x",hash[i]);
   std::string base=persistent+"/shell-music-v1-"+hex;std::vector<uint8_t>encoded,level;
   if(!read(base+".at9",encoded,2*1024*1024)||!read(base+".loudness",level,32)){

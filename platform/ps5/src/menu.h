@@ -56,3 +56,11 @@ static void menuProportionalText(std::vector<uint32_t>& image,int x,int y,const 
     if(scale<1||scale>16)return;const auto& widths=menuGlyphWidths(scale);
     for(unsigned char c:text){auto span=widths[c>=32&&c<=126?c-32:'?'-32];menuText(image,x-span.first,y,std::string(1,char(c)),color,scale,width);x+=span.second;}
 }
+
+// Center the visible glyph ink, rather than the atlas cell, beside an icon.
+static int menuTextCenteredY(const std::string&text,int center,int scale=3){
+    if(scale<1||scale>16)return center;const auto&coverage=menuCoverage(scale);int top=8*scale,bottom=-1,w=6*scale,h=8*scale;
+    for(unsigned char c:text){unsigned g=c>=32&&c<=126?c-32:'?'-32;
+        for(int y=0;y<h;++y)for(int x=0;x<w;++x)if(coverage[(g*h+y)*w+x]){top=std::min(top,y);bottom=std::max(bottom,y);}}
+    return bottom<0?center:center-(top+bottom+1)/2;
+}

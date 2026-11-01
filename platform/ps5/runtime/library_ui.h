@@ -45,7 +45,7 @@ class LibraryUi {
     }
     void button(int x,int y,uint32_t key,const std::string&label){
         using I=apricot::ControlIcon;I icon=key==PAD_CROSS?I::Cross:key==PAD_CIRCLE?I::Circle:key==PAD_SQUARE?I::Square:key==PAD_TRIANGLE?I::Triangle:key==PAD_L1?I::L1:key==PAD_R1?I::R1:I::Dpad;
-        apricot::controller_icon(canvas,1280,720,x,y,icon,true);line(x+48,y+8,label,ink,3,240);
+        apricot::controller_icon(canvas,1280,720,x,y,icon,true);line(x+48,menuTextCenteredY(label,y+20),label,ink,3,240);
     }
     void paragraph(int x,int y,const std::string&text,int width,int maximum=2){
         std::string rest=visible(text,2048);
@@ -190,7 +190,7 @@ class LibraryUi {
         for(;;){std::string error,saved;bool has_saved=romm.saved_server(saved,error);
             if(has_saved||romm.authenticated()){
                 if(has_saved)server=saved;
-                int action=menu("ROMM VERBINDUNG",server,{"Bibliothek oeffnen","Erneut anmelden / Geraet koppeln","Anderen Server verbinden","Abmelden und Verbindung loeschen","Zurueck"});
+                int action=menu("ROMM VERBINDUNG",server,{"Gespeicherte Verbindung oeffnen","Erneut anmelden / Geraet koppeln","Anderen Server verbinden","Abmelden und Verbindung loeschen","Zurueck"});
                 if(action<0||action==4)return false;
                 if(action==3){if(menu("ROMM ABMELDEN","Loescht nur den gespeicherten Zugang dieser App. Serverdateien und Spielstaende bleiben erhalten.",{"Abbrechen","Abmelden und Verbindung loeschen"})==1){if(!romm.forget(error))message(error);else {message("RomM-Verbindung geloescht");return false;}}continue;}
                 if(action==0){
@@ -202,8 +202,10 @@ class LibraryUi {
                 return sign_in();
             }
             if(!error.empty()){
-                int action=menu("ROMM VERBINDUNG",error,{"Neu anmelden","Gespeicherte Verbindung loeschen","Zurueck"});
-                if(action<0||action==2)return false;if(action==1){if(!romm.forget(error))message(error);continue;}
+                int action=menu("ROMM VERBINDUNG",error,{"Gespeicherte Verbindung erneut oeffnen","Neu anmelden","Gespeicherte Verbindung loeschen","Zurueck"});
+                if(action<0||action==3)return false;
+                if(action==0){Transfer t;if(wait("ROMM VERBINDUNG WIEDERHERSTELLEN",t,error,[&]{return romm.resume(t,error);},false))return true;message(error);continue;}
+                if(action==2){if(menu("ROMM VERBINDUNG LOESCHEN","Gespeicherten Zugang dieser App entfernen?",{"Abbrechen","Verbindung loeschen"})==1&&!romm.forget(error))message(error);continue;}
             }
             return sign_in();
         }
@@ -262,15 +264,16 @@ class LibraryUi {
     }
 public:
     LibraryUi(Ps5GpuDisplay&d,std::vector<uint32_t>&c,std::string data):display(d),canvas(c),app(std::move(data)){romm.use_store(app);}
+    void check_saved_connection(){std::string saved,error;romm.saved_server(saved,error);}
     void set_playable(std::vector<std::string> paths){playable=std::move(paths);}
     // Empty input means use installed editions. Only the explicit exit item leaves the app.
     bool choose(std::string&input_path,bool&temporary){
         input_path.clear();temporary=false;prepare_background();
         for(;;){int selected=menu("SPIELBIBLIOTHEK","Quelle waehlen oder importierte Edition starten",{"Importierte Edition spielen","Lokal: Spieldatei auswaehlen","RomM: Bibliothek verbinden","Importierte Spiele verwalten","Beenden"});
             if(selected==4)return false;
-            if(selected<0){if(can_play())return true;continue;}
+            if(selected<0)return true;
             if(selected==0){if(can_play())return true;message("Keine startbereite Edition - eigene NDS ueber Lokal oder RomM importieren");continue;}
-            if(selected==3){manage();if(can_play())return true;continue;}
+            if(selected==3){manage();return true;}
             if(selected==1)input_path=browse();else {input_path=remote();temporary=!input_path.empty();}
             if(!input_path.empty())return true;
         }
