@@ -76,7 +76,7 @@ python3 - "$root" "$app" <<'PY'
 import json,sys
 from pathlib import Path
 root,app=map(Path,sys.argv[1:]);p=json.loads((root/'../../sce_sys/param.json').read_text())
-p.update(titleId='PPSA99429',conceptId='99429',contentId='UP9000-PPSA99429_00-APRICOTGSREADER00',contentVersion='00.040.006',targetContentVersion='00.040.006')
+p.update(titleId='PPSA99429',conceptId='99429',contentId='UP9000-PPSA99429_00-APRICOTGSREADER00',contentVersion='00.040.007',targetContentVersion='00.040.007')
 p.setdefault('pubtools',{})['loudnessSnd0']='-28.00'
 for record in p['localizedParameters'].values():
  if isinstance(record,dict):record['titleName']='ApricotGS'

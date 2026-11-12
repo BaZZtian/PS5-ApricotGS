@@ -33,8 +33,8 @@ your edition and start playing.
 
 ## Status and availability
 
-Download **[ApricotGS v00.040.006](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.006)**.
-Choose **ApricotGS-v00.040.006-PS5.zip** for the application. The release page also
+Download **[ApricotGS v00.040.007](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007)**.
+Choose **ApricotGS-v00.040.007-PS5.zip** for the application. The release page also
 contains the version history and known issues.
 
 This is an experimental release. A complete playthrough has not been verified.
@@ -49,7 +49,7 @@ This is an experimental release. A complete playthrough has not been verified.
 
 ### 1. Install the app
 
-Download **ApricotGS-v00.040.006-PS5.zip** from the release page and extract its
+Download **ApricotGS-v00.040.007-PS5.zip** from the release page and extract its
 `PPSA99429` folder into `/data/homebrew/` on the PS5. The executable should be at:
 
 ```text
@@ -173,7 +173,7 @@ Game names are used only to identify compatibility. No game content is supplied,
 ## Corresponding source and building
 
 The release provides automatic **Source code (zip)** and **Source code (tar.gz)**
-downloads at [v00.040.006](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.006).
+downloads at [v00.040.007](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007).
 Pinned dependency revisions and license/relinking requirements are in
 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
 Use `platform/ps5/tools/build-game-ps5.sh` with `ORQENVA_VULKAN_ROOT` pointing to

@@ -292,11 +292,12 @@ library_entry:
         auto& e=editions[n];std::vector<uint8_t> bytes;GameIdentity id{};
         memcpy(id.game_code,e.bundle.identity,4);memcpy(id.maker_code,e.bundle.identity+4,2);id.revision=e.bundle.identity[6];memcpy(id.sha256,e.bundle.identity+8,32);
         std::string audio_key(reinterpret_cast<const char*>(e.bundle.audio_sha),32);
-        if(menu_audio_keys[n]==audio_key&&menu_audio.tracks[n].frames){any_music=true;continue;}
+        if(menu_audio_keys[n]==audio_key&&menu_audio.tracks[n].frames){if(!menu_started&&!any_music)menu_audio.pin(n);any_music=true;continue;}
         menu_audio.tracks[n]=PreparedMenuAudio{};menu_audio_keys[n].clear();
         if(read_data((e.folder+"/title-menu.pcm").c_str(),bytes,64*1024*1024)){
             uint8_t digest[32];oq_sha256(bytes.data(),bytes.size(),digest);
             if(!memcmp(digest,e.bundle.audio_sha,32)&&menu_audio.tracks[n].load(bytes,id)){
+                if(!menu_started&&!any_music)menu_audio.pin(n);
                 any_music=true;menu_audio_keys[n]=audio_key;
 #ifdef APRICOT_SHELL_MUSIC
                 if(!shell_music_attempted){
@@ -312,7 +313,6 @@ library_entry:
             }
         }
     }
-    menu_audio.select(selected);
     if(any_music&&!menu_started)menu_started=audio_start(PreparedMenuMixer::fill,&menu_audio);
     std::vector<uint32_t> launcher_base(1280*720,0);
     if(!native_art&&art)for(size_t n=0;n<launcher_base.size();++n){auto p=artwork.data()+n*4;launcher_base[n]=0xff000000u|uint32_t(p[0])<<16|uint32_t(p[1])<<8|p[2];}
@@ -335,7 +335,7 @@ library_entry:
         if(p.pressed&PAD_TRIANGLE){library_requested=true;goto library_entry;}
         int direction=launcher_action.horizontal;
         if(!confirming&&direction&&editions.size()>1){unsigned target=direction<0?0:unsigned(editions.size()-1);
-            if(target!=selected){double begin=now_seconds();selected=target;navigation_after=now+0.3;menu_audio.select(selected);say("cartridge_switch selected=%.4s main_thread_us=%.1f cached_audio=1",editions[selected].bundle.identity,(now_seconds()-begin)*1000000);}}
+            if(target!=selected){double begin=now_seconds();selected=target;navigation_after=now+0.3;say("cartridge_switch selected=%.4s main_thread_us=%.1f pinned_music=%u",editions[selected].bundle.identity,(now_seconds()-begin)*1000000,menu_audio.pinned);}}
             if(!editions.empty()&&!confirming&&((p.pressed&PAD_CROSS))){confirming=true;confirm_begin=now;}
         if(confirming&&now-confirm_begin>=0.5)break;
         canvas=launcher_base;
