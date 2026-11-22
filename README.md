@@ -31,6 +31,13 @@ your edition and start playing.
 
 **No game is included.** You need your own legally obtained game dump.
 
+
+## Start here
+
+Choose `ApricotGS-v00.040.007-PS5.zip`. You need your own unmodified German revision 0 HeartGold or SoulSilver `.nds` file. Back up your saves before updating.
+
+[Download v00.040.007](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007)
+
 ## Status and availability
 
 Download **[ApricotGS v00.040.007](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007)**.
@@ -112,8 +119,8 @@ selection screen, press **Options** to exit.
 For an update, replace the application folder with the new release, or use
 ProsperoStore when that update is available there. Keep these folders:
 
-- `/data/apricotgs-roms/` â€” your input game files.
-- `/data/orqenva/` â€” prepared game data and saves; saves are under `saves/`.
+- `/data/apricotgs-roms/` — your input game files.
+- `/data/orqenva/` — prepared game data and saves; saves are under `saves/`.
 
 Back up your saves before updating. Normally, prepared games are reused on later
 starts. If repair is needed, keep the matching original `.nds` file in the input
@@ -170,12 +177,5 @@ The existing [MIT license](LICENSE) applies to the original work covered by that
 
 Game names are used only to identify compatibility. No game content is supplied, no affiliation with Nintendo, Game Freak or Sony is claimed, and users must have the rights required to prepare their own data under applicable law. Providing your own dump is not a blanket legal exemption.
 
-## Corresponding source and building
 
-The release provides automatic **Source code (zip)** and **Source code (tar.gz)**
-downloads at [v00.040.007](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007).
-Pinned dependency revisions and license/relinking requirements are in
-[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
-Use `platform/ps5/tools/build-game-ps5.sh` with `ORQENVA_VULKAN_ROOT` pointing to
-the pinned PS5 Vulkan/dependency build, then `python3 assets/prepare-ui.py <app-directory>`
-for the project-owned display assets. No game data or saved connection is included.
+[Build and developer documentation](BUILDING.md)
