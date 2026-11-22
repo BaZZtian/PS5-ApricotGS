@@ -10,18 +10,20 @@
 </p>
 
 <p align="center">
-  <a href="#status-and-availability"><img src="https://img.shields.io/badge/status-experimental%20release-orange" alt="Status: experimental release"></a>
+  <a href="#download"><img src="https://img.shields.io/badge/status-experimental%20release-orange" alt="Status: experimental release"></a>
   <img src="https://img.shields.io/badge/platform-PS5%20homebrew-003791" alt="Platform: PS5 homebrew">
   <a href="#requirements"><img src="https://img.shields.io/badge/game%20data-Own%20NDS%20dump-555555" alt="Game data: Own NDS dump"></a>
 </p>
 
 <p align="center">
-  <a href="#status-and-availability">Status</a> &middot;
+  <a href="#download">Download</a> &middot;
   <a href="#installation">Installation</a> &middot;
   <a href="#compatibility">Compatibility</a> &middot;
   <a href="#support">Support</a> &middot;
   <a href="#credits-and-licenses">Credits &amp; licenses</a>
 </p>
+
+[Download](#download) · [Installation](#installation) · [Controls](#controls) · [Help](#support)
 
 ## About
 
@@ -31,13 +33,23 @@ your edition and start playing.
 
 **No game is included.** You need your own legally obtained game dump.
 
-## Status and availability
+## Download
 
-Download **[ApricotGS v00.040.007](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007)**.
-Choose **ApricotGS-v00.040.007-PS5.zip** for the application. The release page also
-contains the version history and known issues.
+**ApricotGS v00.040.007** for PS5 is available in [Prospero Store](https://prosperostore.net/app/PPSA99429/) and as [ApricotGS-v00.040.007-PS5.zip](https://github.com/BaZZtian/PS5-ApricotGS/releases/download/v00.040.007/ApricotGS-v00.040.007-PS5.zip) for manual installation. Verify the ZIP using [SHA256SUMS.txt](https://github.com/BaZZtian/PS5-ApricotGS/releases/download/v00.040.007/SHA256SUMS.txt). See the [release notes](https://github.com/BaZZtian/PS5-ApricotGS/releases/tag/v00.040.007) for the title music fix and corresponding source downloads.
 
-This is an experimental release. A complete playthrough has not been verified.
+ApricotGS is experimental. A complete playthrough has not been verified.
+
+## Features
+
+- Local game-file browser and RomM library with download progress/cancellation.
+- Remembered RomM connection, device pairing and explicit logout.
+- Import management with confirmation; saves are kept when an import is removed.
+- Consistent glass surfaces, readable focus/case indicators and original controller prompts.
+- Animated cartridge selection with edition-specific title images.
+- Continuous title music when switching cartridges, plus Home-screen tile music.
+- DualSense controls and an on-screen pointer for the touchscreen.
+- A two-screen layout with a larger main view.
+- Separate saves for HeartGold and SoulSilver.
 
 ## Requirements
 
@@ -85,18 +97,6 @@ continues during library visits. Music is generated locally from your own game;
 the first preparation or an update of older title music can take longer. Existing
 game data is preserved while the music is updated.
 
-
-## Features
-
-- Local game-file browser and RomM library with download progress/cancellation.
-- Remembered RomM connection, device pairing and explicit logout.
-- Import management with confirmation; saves are kept when an import is removed.
-- Consistent glass surfaces, readable focus/case indicators and original controller prompts.
-- Animated cartridge selection with edition-specific title images and music.
-- Continuous title music when switching cartridges, plus Home-screen tile music.
-- DualSense controls and an on-screen pointer for the touchscreen.
-- A two-screen layout with a larger main view.
-- Separate saves for HeartGold and SoulSilver.
 
 ## Saving and updates
 
